@@ -5,7 +5,6 @@
 #include <chain.h>
 #include <clientversion.h>
 #include <core_io.h>
-#include <fs.h>
 #include <hash.h>
 #include <interfaces/chain.h>
 #include <key_io.h>
@@ -17,6 +16,7 @@
 #include <sync.h>
 #include <uint256.h>
 #include <util/bip32.h>
+#include <util/fs.h>
 #include <util/time.h>
 #include <util/translation.h>
 #include <wallet/rpc/util.h>
@@ -752,6 +752,7 @@ RPCHelpMan dumpwallet()
 
     // sort time/key pairs
     std::vector<std::pair<int64_t, CKeyID> > vKeyBirth;
+    vKeyBirth.reserve(mapKeyBirth.size());
     for (const auto& entry : mapKeyBirth) {
         vKeyBirth.push_back(std::make_pair(entry.second, entry.first));
     }
@@ -1760,7 +1761,8 @@ RPCHelpMan listdescriptors()
                         {RPCResult::Type::NUM, "", "Range start inclusive"},
                         {RPCResult::Type::NUM, "", "Range end inclusive"},
                     }},
-                    {RPCResult::Type::NUM, "next", /*optional=*/true, "The next index to generate addresses from; defined only for ranged descriptors"},
+                    {RPCResult::Type::NUM, "next", /*optional=*/true, "Same as next_index field. Kept for compatibility reason."},
+                    {RPCResult::Type::NUM, "next_index", /*optional=*/true, "The next index to generate addresses from; defined only for ranged descriptors"},
                 }},
             }}
         }},
@@ -1837,6 +1839,7 @@ RPCHelpMan listdescriptors()
             range.push_back(info.range->second - 1);
             spk.pushKV("range", range);
             spk.pushKV("next", info.next_index);
+            spk.pushKV("next_index", info.next_index);
         }
         descriptors.push_back(spk);
     }
